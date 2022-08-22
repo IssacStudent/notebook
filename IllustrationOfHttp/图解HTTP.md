@@ -1,5 +1,7 @@
 # Web以及网络基础
 
+## 基本知识
+
 HTTP（HyperText Transfer Protocol，超文本传输协议）
 
 __客户端__借助该协议发请求到__服务端__，获取**信息**
