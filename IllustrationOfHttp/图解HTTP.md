@@ -168,7 +168,7 @@ HTTP协议中采用了多部分对象集合（Multipart），即发送的报文�
 +   `multipart/form-data`，一般用于Web表单文件上传时使用。
 +   `multipart/byteranges`，如果状态码为206（Partial Content，部分内容）时，表名响应报文包含了多个范围的内容。
 
-要使用以上多部分对象集合，需要在首部字段中加上`Content-Type`。具体见[HTTP首部](# HTTP首部)。
+要使用以上多部分对象集合，需要在首部字段中加上`Content-Type`。具体见[HTTP首部](#custom-id)。
 
 多部分对象中的各类实体之间使用**boundary**来划分。例如：
 
@@ -241,7 +241,7 @@ Content-Range: bytes 7000-7999/8000
 
 ## 与HTTP协作的Web服务器
 
-## HTTP首部
+## HTTP首部 {#custom-id}
 
 ## HTTPS
 
