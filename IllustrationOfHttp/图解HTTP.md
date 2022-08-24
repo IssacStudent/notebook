@@ -96,7 +96,7 @@ Content-Type: text/html
 ......
 ```
 
-起始行为HTTP版本，200和OK为状态码以及原因短语，下一行为创建响应的日期时间（属于首部字段），最后空一行，为资源实体的主体（在案例中为html形式的内容）
+起始行为HTTP版本，200和OK为状态码以及原因短语，下一行为创建响应的日期时间（属于首部字段），最后空一行，为资源实体的主体（在案例中为html形式的内容）。
 
 ### HTTP为无状态的协议（stateless）[^1]
 
@@ -141,5 +141,118 @@ HTTP协议自身不会保留之前一切请求或者响应报文的信息，如�
 3.   Cookie可以看作Session的唯一id
 4.   Session会过期，因此隔一段时间会需要重新登录。以Tomcat服务器为例，过期时间默认为30分钟。
 
+## HTTP报文内的信息
+
+HTTP报文是多行数据构成的字符串文本，用**CR+LF**作为换行符，即0x0d0a，CR为Carriage Return，回车，LF为Line Feed，换行。报文首部和报文主体之间用CR+LF分隔。
+
+### HTTP报文结构
+
+包含请求行、状态行、首部。其中首部又包含请求首部、响应首部、通用首部、实体首部。
+
+除此之外还有一些其他的（RFC中未定义的首部）信息，如Cookie。
+
+### 编码提升传输速率
+
+HTTP通信中的基本单位为**报文**，由8位组成字节流。
+
+传输内容可以进行编码，使大小发生改变而所含信息量不发生变化。一般是服务端编码，客户端解码。
+
+传输的数据可以进行分割，即分块传输编码（Chunked Transfer Coding），每一块都会使用十六进制标记块大小，最后一块使用0（CR+LF）。
+
+### 多种数据的多部分对象集合
+
+HTTP协议中采用了多部分对象集合（Multipart），即发送的报文中可以含有多种类型的实体（如文件上传）。
+
+多部分对象集合包含的对象如下：
+
++   `multipart/form-data`，一般用于Web表单文件上传时使用。
++   `multipart/byteranges`，如果状态码为206（Partial Content，部分内容）时，表名响应报文包含了多个范围的内容。
+
+要使用以上多部分对象集合，需要在首部字段中加上`Content-Type`。具体见[HTTP首部](# HTTP首部)。
+
+多部分对象中的各类实体之间使用**boundary**来划分。例如：
+
+```http
+Content-Type: multipart/form-data; boundary=AaB03x
+　--AaB03x
+Content-Disposition: form-data; name="field1"
+  
+Joe Blow
+--AaB03x
+Content-Disposition: form-data; name="pics"; filename="file1.txt"
+Content-Type: text/plain
+　
+...（file1.txt的数据）...
+--AaB03x--
+```
+
+上述`multipart/form-data`报文中指定了分隔符为*"AaB03x"*，那么在多个实体之间需要通过"\-\-AaB03x"来划分，使用"\-\-AaB03x\-\-"标记作为结束。
+
+```http
+HTTP/1.1 206 Partial Content
+Date: Fri, 13 Jul 2012 02:45:26 GMT
+Last-Modified: Fri, 31 Aug 2007 02:02:20 GMT
+Content-Type: multipart/byteranges; boundary=THIS_STRING_SEPARATES
+ 
+--THIS_STRING_SEPARATES
+Content-Type: application/pdf
+Content-Range: bytes 500-999/8000
+...（范围指定的数据）...
+--THIS_STRING_SEPARATES
+Content-Type: application/pdf
+Content-Range: bytes 7000-7999/8000
+...（范围指定的数据）...
+--THIS_STRING_SEPARATES--
+```
+
+上述`multipart/byteranges`报文中指定了*"THIS_STRING_SEPARATES"*作为分隔符。
+
+多部分对象集合的**每个**部分类型中，都可以含有首部字段，另外，某个部分中可以**嵌套**使用多部分集合。
+
+### 获取部分内容的范围请求
+
+对于大文件的上传，可以使用`Range`首部来指定字节范围。例如
+
+*   `Range: bytes=5001-10000`
+*   `Range: bytes=5001-`
+*   `Range: bytes=0-3000, 5000-7000`[^3]
+
+对于范围请求，响应会返回状态码为`206 ParticalContent`的响应报文。
+
+如果服务器**无法**响应范围请求，会返回`200 OK`和**完整**的实体内容。
+
+### 内容协商返回最合适的内容
+
+同一个 Web 网站有可能存在着多份相同内容的页面。比如英语版和中文版的 Web 页面，它们内容上虽相同，但使用的语言却不同。当浏览器的默认语言为英语或中文，访问相同 URI 的 Web 页面时，则会显示对应的英语版或中文版的 Web 页面。这样的机制称为**内容协商（Content Negotiation）**。客户端与服务端就响应的内容（语言、字符集、编码方式等）进行交涉，之后返回最为适合的资源。例如使用以下首部：
+
++   Accept
++   Accept-Charset
++   Accept-Encoding
++   Accept-Language
++   Content-Language
+
+内容协商有三大类型：
+
++   服务器驱动协商：服务器根据客户端（也就是浏览器）发送的信息进行判定。
++   客户端驱动协商：由客户端进行内容协商的方式。用户从浏览器显示的可选项列表中手动选择。还可以利用 JavaScript 脚本在 Web 页面上自动进行上述选择。比如按 OS 的类型或浏览器类型，自行切换成 PC 版页面或手机版页面。
++   透明协商：服务器驱动和客户端驱动的结合体。
+
+## HTTP状态码
+
+## 与HTTP协作的Web服务器
+
+## HTTP首部
+
+## HTTPS
+
+## 认证机制
+
+## 基于HTTP的功能追加协议
+
+## 构建Web内容的技术
+
+## Web的攻击技术
+
 [^1]:对无状态的说明：HTTP协议自身不会对请求与响应做持久化处理，主要是为了更快处理**大量事务**
 [^2]:在REST架构的网站中，PUT和POST都可以向HTTP服务器提交数据，但PUT一般是幂等的。若不存在则新建内容，若存在则修改内容，具体见[RFC文档](https://www.rfc-editor.org/rfc/rfc7231)。
+[^3]:对于多重范围的请求，响应的首部字段会设置`Content-Type: multipart/byteranges`后返回响应报文。
