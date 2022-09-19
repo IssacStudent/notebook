@@ -272,7 +272,7 @@ HTTP状态码：表示客户端发出的HTTP请求的返回结果、标记服务
 | 301 Moved Permanently  | 永久性重定向，表示该资源已经被分配了新的URI。这时候，首部字段Location会提示新的URI，这个时候需要浏览器更新新的URI书签引用。 |
 | 302 Found              | 临时性重定向，表示资源已被分配了新的URI，本次使用新的URI，但是这个资源不是永久移动，而是**临时**性质的。 |
 | 303 See Other[^4][^5]  | 表示资源存在另一个URI，需要用**GET**方法重定向。             |
-| 304 Not Modified       | 客户端发送附带条件的请求时[^6]，服务器资源没有改变，可以直接使用客户端**未过期**的缓存。例如发送`If-Modified-Since`头部，如果在特定时间之后，服务器并没有改变资源，那么就可以返回304，如果服务器对资源进行了修改，那么返回200 OK，并返回修改后的资源。 |
+| 304 Not Modified       | 客户端发送[附带条件的请求](# If-Match)时[^6]，服务器资源没有改变，可以直接使用客户端**未过期**的缓存。例如发送`If-Modified-Since`头部，如果在特定时间之后，服务器并没有改变资源，那么就可以返回304，如果服务器对资源进行了修改，那么返回200 OK，并返回修改后的资源。 |
 | 307 Temporary Redirect | 临时重定向，与302含义相同。307要求客户端不改变原先的请求方法。 |
 
 ### 4XX 客户端错误
@@ -526,15 +526,196 @@ Via字段可以追踪客户端与服务器之间的传输路径，还可以**防
 
 ### 请求首部字段
 
+#### Accept
 
+该首部字段可以让客户端通知服务器，用户代理能够处理的媒体类型以及相对的优先级。媒体类型使用type/subtype格式，优先级使用q=来表示权重，范围为0~1，不指定权重则为1。
+
+类型与权值之间用分号（;）进行分隔，类型之间用逗号（,）分隔，因此服务器提供多种内容时，优先返回权重值最高的媒体类型。
+
+例如：
+
+```http
+Accept: text/html; q=0.3, text/html
+```
+
+因此，如果服务器有html格式和text格式的资源时，由于text/html的权重为1，因此会返回html格式的资源。
+
+#### Accept-Cahrset
+
+该字段用来通知服务器用户代理支持的字符集以及字符集的优先顺序，同样可以指定多个字符集，并赋予权重值。
+
+例如：
+
+```http
+Accept-Charst: iso-8859-5, unicode-1-1;q=0.8
+```
+
+#### Accept-Encoding
+
+该字段用于通知服务器用户代理支持的内容编码以及优先级顺序。内容编码方式有如下几个：
+
+*   gzip
+*   compress
+*   deflate
+*   identity（不执行压缩或者不会变化的默认编码格式）
+
+#### Accept-Language
+
+可以指定语言集，例如：
+
+```http
+Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3
+```
+
+#### Authorization
+
+该字段可以告知服务器，用户代理的认证信息。一般情况下，当需要认证时，服务器会返回401 Unauthorized，之后的请求需要提供这个首部字段。如图：
+
+![image-20220919214026233](../../../AppData/Roaming/Typora/typora-user-images/image-20220919214026233.png)
+
+#### Expect
+
+该字段用户告知服务器，期望出现的某种行为。例如：
+
+```http
+Expect: 100-continue
+```
+
+服务器无法理解时，会返回状态码417-Expectation Failed。
+
+#### From
+
+该字段包含用户的电子邮件地址。一般用来显示搜索引擎等用户代理的负责人的电子邮件。
+
+#### Host
+
+若单台服务器分配了多个域名，那么需要指定Host这个首部字段来说明使用哪个域名对应的服务处理该请求。如果服务器未设定主机名，可以发送一个空值。
+
+#### If-Match
+
+类似于If-xxx这种样式的请求首部字段，都称之为条件请求，服务器判断该条件为真时，才会执行这个请求。
+
+另外，对于某个特定资源，会有关联的**[实体标记（ETag）](#ETag)**值，当资源更新时，这个值也会随之更新。
+
+服务器会比对字段值和实际资源的ETag值，当两者一致时，才会执行请求，否则会返回412 Precondition Failed的响应。
+
+还可以使用星号（*），在这种情况下，服务器会**忽略**ETag值。
+
+![image-20220919221407217](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/image-20220919221407217.png)
+
+#### If-None-Match
+
+与[If-Match](#If-Match)作用相反。可以使用该首部信息来获取**最新资源**。
+
+#### If-Modified-Since
+
+当资源在指定时间之后发生过更新，则会返回资源。如果在指定时间之后，并没有发生资源的更新，那么服务器会返回304 Not Modified响应。
+
+该字段可以用来确认代理或者客户端拥有的**本地资源**的**有效性**。资源的更新时间可以通过[Last-Modified](#Last-Modified)字段来确定。
+
+![image-20220919221425178](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/image-20220919221425178.png)
+
+#### If-Unmodified-Since
+
+与[If-Modified-Since](#If-Modified-Since)相反，如果在指定时间之后没有发生修改，则处理请求，否则返回412 Precondition Failed响应。
+
+#### If-Range
+
+该字段包含的[ETag](#ETag)值或者时间与服务器资源一致时，才会处理客户端的范围请求。否则返回全体资源。
+
+![image-20220919221809362](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/image-20220919221809362.png)
+
+如果不适用If-Range请求头，如果客户端想要更新部分资源，那么需要发送[If-Match](#If-Match)和[Range](#Range)这两个请求头，但是服务器中，客户端所需要的**部分资源**已经失效了，因此会返回412，此时，客户端需要再发一次请求，才可以获取新的。因此，使用If-Range请求头节省了时间。
+
+#### Max-Forwards
+
+该字段内容为十进制整数，表示可经过的服务器最大的数目。在请求前往下一个服务器进行转发之前，当前服务器会将该值减1后重新赋值。当某个服务器接收到Max-Forwards为0时，不再进行转发，而是直接返回响应。
+
+在实际使用HTTP协议进行通信时，我们无法得知代理服务器的运行情况，例如：由于未知原因导致请求失败，或是导致请求陷入循环。这时我们就必须指定这个字段值，可以对传输路径的通信状况有所把握。
+
+#### Proxy-Authorization
+
+该字段与[Authorization](#Authorization)类似，都是进行认证的，但不同之处在于，该字段用于客户端与**代理**之间的认证行为。
+
+#### Range
+
+该字段可以指定范围请求。例如
+
+```http
+Range: bytes=5001-10000
+```
+
+服务器如果可以处理部分请求，则会返回部分请求的内容以及206 Partial Content响应，若无法处理部分请求，则会返回200 OK的响应以及全部资源。
+
+#### Referer
+
+首部字段Referer会告知服务器请求资源的原始URI。
+
+#### TE
+
+该字段告知服务器客户端能够处理得传输编码方式以及优先级。与[Accept-Encoding](#Accept-Encoding)类似，但是TE用来表示**传输**编码，而[Accept-Encoding](#Accept-Encoding)用来表示**内容**编码。
+
+#### User-Agent
+
+该字段会记录创建请求的**浏览器**和**用户代理名称**等信息传达给服务器。
 
 ### 响应首部字段
 
+#### Accept-Ranges
+
+#### Age
+
+#### ETag
+
+#### Location
+
+#### Proxy-Authenticate
+
+#### Retry-After
+
+#### Server
+
+#### Vary
+
+#### WWW-Authenticate
+
 ### 实体首部字段
+
+#### Allow
+
+#### Content-Encoding
+
+#### Content-Language
+
+#### Content-Length
+
+#### Content-Location
+
+##### Content-MD5
+
+#### Content-Range
+
+#### Content-Type
+
+#### Expires
+
+#### Last-Modified
 
 ### 与Cookie相关的首部字段
 
+#### Set-Cookie
+
+#### Cookie
+
 ### 其他首部字段
+
+#### X-Frame-Options
+
+#### X-XSS-Protection
+
+#### DNT
+
+#### P3P
 
 ## 确保Web安全的HTTPS
 
