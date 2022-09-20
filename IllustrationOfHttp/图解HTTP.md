@@ -663,59 +663,143 @@ Range: bytes=5001-10000
 
 #### Accept-Ranges
 
+服务器使用该字段告诉客户端是否可以处理范围请求。可以处理则为bytes，否则为none。
+
 #### Age
+
+服务器使用该字段表示其在多久之前创建了响应。单位为秒。
+
+如果响应为缓存服务器，那么Age表示缓存后的响应再次发起认证（向源服务器确认）到认证完成的时间值。
 
 #### ETag
 
+服务器使用ETag来唯一确定资源。当资源发生了改变后，ETag值也会改变；另外，不同版本（如中英文版本）的ETag值也是不同的。
+
+ETag值有强弱之分，强ETag值表示资源对应的实体不论发生了多么细微的变化都会改变值；而对于弱ETag值，只有资源发生了根本改变，这个值才会改变。此时会在值之前附加`W/`。例如
+
+```http
+ETag: W/"usagi-1234"
+```
+
 #### Location
+
+该字段可以将响应接收方引导至另一个URI对应的资源（一般与重定向状态码配合使用）。
+
+几乎所有浏览器在接收到包含该字段的响应后，都会进行**强制性**的重定向。
+
+![image-20220919230411622](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/image-20220919230411622.png)
 
 #### Proxy-Authenticate
 
+用于代理服务器和客户端之间的权限认证。字段包含了**代理服务器**所要求的认证信息。
+
 #### Retry-After
+
+该状态码配合503 Service Unavaliable或者重定向响应一起使用，告知客户端在多久之后再次发送请求。常用的字段值为具体的日期时间或者创建响应后的秒数。
 
 #### Server
 
+包含服务器上安装的HTTP服务器应用程序的信息。如`Apache/2.2.17 (Unix) PHP/5.2.5`。
+
 #### Vary
+
+该字段用于控制缓存，由服务器发给缓存服务器使用，传达关于本地缓存使用方法。例如：
+
+```http
+Vary: Accept-Language
+```
+
+此时，缓存服务器可以进行缓存操作，具体方式为：当缓存服务器收到获取资源的请求，并且包含首部字段`Accept-Language`，那么就会返回缓存；否则，即时请求的为相同资源，由于和Vary指定的首部字段不同，因此必须要从源服务器重新获取资源。
 
 #### WWW-Authenticate
 
+用于**客户端**和**服务器**之间的HTTP访问认证。
+
+关于认证相关的内容参考[HTTP认证](#认证机制)。
+
 ### 实体首部字段
+
+实体首部字段是请求报文和响应报文中的实体部分所使用的首部字段。
 
 #### Allow
 
+当服务器接收到不支持的HTTP方法时，会返回状态码405 Method Not Allowed，并且在该字段里声明其所支持的所有HTTP方法。
+
 #### Content-Encoding
+
+该字段表示服务器对实体的主体部分使用的内容编码的方式。内容编码的[具体方式](#Accept-Encoding)有这几种。
 
 #### Content-Language
 
+表示实体主体部分使用的自然语言。
+
 #### Content-Length
+
+表示实体主体部分的大小，单位为字节[^8]。
 
 #### Content-Location
 
-##### Content-MD5
+字段表示与报文主体相对应的URI。
+
+#### Content-MD5
+
+该字段用于检查报文主体在传输过程中是否保持完整，并确认传输到达。
+
+服务器对报文主体执行MD5算法，得到128位二进制数。之后再进行Base64编码，写入该字段。客户端会对报文再进行一次相同的MD5算法，两者进行比较之后就可以判断报文主体的有效性。
+
+由于MD5的特性，报文如果发生了偶发性改变，是不会查到的；并且该方法无法检验处恶意篡改，因为内容和首部字段都是可以进行篡改的。
 
 #### Content-Range
 
+该字段针对范围请求，表示实体的具体范围。
+
 #### Content-Type
+
+表示实体的主体对象的媒体类型，使用type/subtype的形式赋值。
 
 #### Expires
 
+该字段告知客户端资源失效的日期。如果是缓存服务器，会以该日期为准来判断缓存的有效性。当处于有效期以内时，会直接返回缓存。如果服务器不希望缓存服务器进行缓存操作，则会将该字段置为和Date字段相同的值。
+
+一般情况下，当含有[Cache-Control](#Cache-Control)指定的max-age指令时，会优先处理，并忽略Expires字段。
+
 #### Last-Modified
+
+该字段指明资源最终修改的时间。
 
 ### 与Cookie相关的首部字段
 
-#### Set-Cookie
+#### Set-Cookie（响应首部字段）
 
-#### Cookie
+一个典型的案例：
+
+```http
+Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31 GMT; path=/; domain=.examples.com;
+```
+
+字段属性如下：
+
+*   expires：表示浏览器可以发送Cookie的有效期。如果不指定，则默认为关闭浏览器即失效。
+*   path：用于限制指定Cookie的发送范围的文件目录。但是这个限制不一定是安全的。
+*   domain：该属性指定的域名与访问域名的结尾匹配一致时，都可以发送Cookie。
+*   secure：限制浏览器仅在HTTPS连接时，才可以发送Cookie。
+*   HttpOnly：该功能使得JavaScript无法获取Cookie，可以防止跨站脚本攻击（Cross-site scripting, XSS）对**Cookie信息的窃取**。在进行该字段设置后，Web页面还可以对Cookie进行读取操作，但是使用JavaScript的
+
+```javascript
+document.cookie
+```
+
+就无法读取HttpOnly属性之后的Cookie的内容了，防止了XSS中利用JavaScript进行Cookie的劫持。
+
+#### Cookie（请求首部字段）
+
+当客户端想要获得HTTP状态管理支持时，可以在请求中包含从服务器接收到的Cookie。
 
 ### 其他首部字段
 
-#### X-Frame-Options
-
-#### X-XSS-Protection
-
-#### DNT
-
-#### P3P
+*   X-Frame-Options：该字段可以控制网站内容在其他网站的Frame标签内的显示问题。设置为DENY表示拒绝显示，而设置为SAMEORIGIN时，仅可以在同源域名下加载。
+*   X-XSS-Protection：设置为1时，可以开启浏览器XSS防护机制。
+*   DNT：表示Do Not Track，设置为1时，可以拒绝网站收集个人信息。
 
 ## 确保Web安全的HTTPS
 
@@ -739,3 +823,4 @@ Range: bytes=5001-10000
 [^5]:301、302、303响应状态码返回时，几乎所有浏览器都会把POST改成GET，之后再次发送请求，但实际上，301和302是禁止这么做的。
 [^6]:比如首部信息包含：`If-Match`、`If-Modified-Since`、`If-None-Match`、`If-Range`、`If-Unmodified-Since`
 [^7]:注意区别：no-cache必须做强制性的有效性校验，而no-store侧重于真正的不存储任何资源。
+[^8]:当对实体的主体使用了内容编码时，不能再使用该字段。
