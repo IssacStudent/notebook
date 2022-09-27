@@ -57,9 +57,9 @@ URL：统一资源定位符，表示资源的地点
 
 以 `http://user:pass@www.example.jp:80/dir/index.htm?uid=1#ch1` 为例
 
-| http:://         | user:pass        | www.example.jp                                        | 80                         | /dir/index.htm   | uid=1                          | ch1            |
-| ---------------- | ---------------- | ----------------------------------------------------- | -------------------------- | ---------------- | ------------------------------ | -------------- |
-| 协议方案名       | 登录信息（认证） | 服务器地址                                            | 端口号                     | 带层次的文件路径 | 查询字符串                     | 片段标识符     |
+| http:://         | user:pass        | www.example.jp                                         | 80                         | /dir/index.htm   | uid=1                          | ch1            |
+| ---------------- | ---------------- | ------------------------------------------------------ | -------------------------- | ---------------- | ------------------------------ | -------------- |
+| 协议方案名       | 登录信息（认证） | 服务器地址                                             | 端口号                     | 带层次的文件路径 | 查询字符串                     | 片段标识符     |
 | 协议方案名附冒号 | 认证信息（可选） | DNS 可解析的域名/ IPv4 地址/用方括号括起来的 IPv6 地址 | 可选（自动使用默认端口号） | 定位资源的位置   | 查询字符串可以传入参数（可选） | 子资源（可选） |
 
 ## 简单的 HTTP 协议（以 HTTP/1.1 为例）
@@ -399,6 +399,7 @@ Cache-Control: private, max-age=0, no-cache
 | cache-extension  | -      | 新指令标记（token）                            |
 
 *   是否可以缓存的指令
+
     *   public：公共缓存，其他用户也可以使用
     *   private：响应只以特定的用户作为对象。（缓存服务器只会对特定用户进行资源缓存）
     *   no-cache：使用 no-cache 的目的是为了避免从缓存中拿到**<u>过期</u>**的资源。
@@ -406,6 +407,7 @@ Cache-Control: private, max-age=0, no-cache
         *   对于服务器返回的响应来说，表示缓存服务器禁止对资源进行缓存，并且源服务器以后也不会对缓存服务器提出的**资源有效性**进行确认。
 
 *   控制可执行缓存到的对象的指令
+
     *   no-store：表示不能在本地存储请求或者响应的任意部分[^7]。
 
 *   指定缓存期限与认证的指令
@@ -418,30 +420,30 @@ Cache-Control: private, max-age=0, no-cache
     *   s-maxage：与 max-age 相同，但是一般只适用于供多位用户使用的公共缓存服务器。
 
         >HTTP/1.1 版本的服务器，处理相关字段的优先级为：s-maxage > max-age > Expires（首部字段）
-        
+
     * min-fresh：要求缓存服务器返回至少还未过指定时间的缓存资源。
-    
+
     * max-stale：表示接收缓存资源，即使过期。
-    
+
         >   如果指令未指定参数值，那么无论经过多久，客户端都会接收响应；如果指令中指定了具体数值，那么即使过期，只要仍处于 max-stale 指定的时间内，仍旧会被客户端接收。
-    
+
     * only-if-cached：表示客户端仅在缓存服务器本地缓存了目标资源的情况下才会返回。也就是说，该指令要求缓存服务器不重新加载响应，也不确认资源有效性。如果缓存服务器本地无响应，则返回 504 Gateway Timeout。
-    
+
     * must-revalidate：表示要向源服务器重新验证资源的有效性，否则返回 504。另外，该指令会忽略 max-stale。
-    
+
     * proxy-revalidate：要求**所有的**缓存服务器都必须再次验证资源的有效性。
-    
+
     * no-transform：缓存不能改变主体的媒体类型。这样可以防止缓存或者代理压缩图片等操作。
 
 
 *   Cache-Control 扩展
 
     cache-extension 标记可以扩展首部字段的指令。格式为
-    
+
     ```http
     `token [ "=" ( token | quoted-string ) ]`
     ```
-    
+
     如：`Cache-Control: private, community="UCI"`。在这个首部信息中，private 是 Cache-Control 这个首部字段有的指令，但是 community 不是，它只有缓存服务器可以理解，如果理解不了，就会忽略，因此这个字段是双方约定的。
 
 #### Warning
@@ -783,7 +785,7 @@ Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31 GMT; path=/; domain
 *   path：用于限制指定 Cookie 的发送范围的文件目录。但是这个限制不一定是安全的。
 *   domain：该属性指定的域名与访问域名的结尾匹配一致时，都可以发送 Cookie。
 *   secure：限制浏览器仅在 HTTPS 连接时，才可以发送 Cookie。
-*   HttpOnly：该功能使得 JavaScript 无法获取 Cookie，可以防止跨站脚本攻击（Cross-site scripting, XSS）对 **Cookie信息的窃取**。在进行该字段设置后，Web 页面还可以对 Cookie 进行读取操作，但是使用 JavaScript 的 `document.cookie` 就无法读取 HttpOnly 属性之后的 Cookie 的内容了，防止了 XSS 中利用 JavaScript 进行 Cookie 的劫持。
+*   HttpOnly：该功能使得 JavaScript 无法获取 Cookie，可以防止跨站脚本攻击（Cross-site scripting，XSS）对 **Cookie信息的窃取**。在进行该字段设置后，Web 页面还可以对 Cookie 进行读取操作，但是使用 JavaScript 的 `document.cookie` 就无法读取 HttpOnly 属性之后的 Cookie 的内容了，防止了 XSS 中利用 JavaScript 进行 Cookie 的劫持。
 
 #### Cookie（请求首部字段）
 
@@ -807,7 +809,7 @@ Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31 GMT; path=/; domain
 
 *   通信加密
 
-HTTP 可以通过与 **SSL**（Secure Socket Layer, 安全套接层）或者 TLS（Transport Layer Security, 安全传输层协议）的组合使用，组成 **HTTPS**（HTTP Secure，超文本传输安全协议），来加密 HTTP 的通信内容。
+HTTP 可以通过与 **SSL**（Secure Socket Layer，安全套接层）或者 TLS（Transport Layer Security，安全传输层协议）的组合使用，组成 **HTTPS**（HTTP Secure，超文本传输安全协议），来加密 HTTP 的通信内容。
 
 *   内容加密
 
@@ -822,7 +824,7 @@ HTTP 协议中没有内容加密机制，因此必须要手动进行加密。但
 1.   无法确认请求发送至目标的 Web 服务器是不是按照真实意图返回响应的服务器，有可能是**伪装的服务器**。
 2.   无法确定响应返回到的客户端是否为按照真实意图接收响应的那个客户端，有可能是**伪造的客户端**（爬虫）。
 3.   无法确定对方是否具备相关资源的访问**权限**。
-4.   服务器会处理所有请求，即使这个请求无意义，因此无法阻止 **DoS**（Denial of Service, 拒绝服务攻击）攻击。
+4.   服务器会处理所有请求，即使这个请求无意义，因此无法阻止 **DoS**（Denial of Service，拒绝服务攻击）攻击。
 
 基于这种情况，就需要查明对方的**证书**。
 
@@ -830,7 +832,7 @@ HTTP 协议中没有内容加密机制，因此必须要手动进行加密。但
 
 #### 无法证明报文的完整性，有遭篡改的风险
 
-在信息传输过程中，服务器和客户端都无法得知报文是否被修改过，这种通过拦截并篡改内容的攻击称为 MITM（Man-in-the-Middle attack, 中间人攻击）。
+在信息传输过程中，服务器和客户端都无法得知报文是否被修改过，这种通过拦截并篡改内容的攻击称为 MITM（Man-in-the-Middle attack，中间人攻击）。
 
 基于这种情况，需要使用校验的方法来验证报文是否正常。例如使用 MD5 或者 SHA-1 等散列值校验的方法以及数字签名方法。
 
@@ -846,7 +848,7 @@ HTTPS 并非一个新的协议，只是将 HTTP 与 SSL 和 TLS 结合起来。H
 
 ##### 加密技术
 
-常见的加密方法分为对称加密（Common key crypto system, 共享秘钥加密）和非对称加密（Public-key cryptography, 公开密钥加密）。
+常见的加密方法分为对称加密（Common key crypto system，共享秘钥加密）和非对称加密（Public-key cryptography，公开密钥加密）。
 
 1.   对称加密
 
@@ -871,7 +873,7 @@ HTTPS 并非一个新的协议，只是将 HTTP 与 SSL 和 TLS 结合起来。H
 
 使用了加密技术之后，虽然数据的安全性可以得到保证，但是正如[一开始](#无法验证通信双方的身份，可能遭遇伪装)所说的，无法证明某件事物是正确的、一方想要的事物，而不是中途被攻击者所替换了的事物。
 
-解决该问题可以使用**数字证书认证机构（CA, Certificate Authority）**以及机构颁发的**公开密钥证书**。
+解决该问题可以使用**数字证书认证机构（CA，Certificate Authority）**以及机构颁发的**公开密钥证书**。
 
 >   服务器的运营人员会向数字证书认证机构提出**公开密钥认证**的申请，机构在判明提出申请者的身份之后，会对申请的公开密钥做数字签名，之后会分配这个已签名的公开密钥，该公开密钥会和公钥证书一起绑定。
 >
@@ -943,26 +945,331 @@ HTTP 常用的认证方式有：
 
 ### BASIC 认证
 
+![BASIC](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/BASIC.jpg)
+
+BASIC认证的步骤如下：
+
+1.   服务器在需要进行认证时，返回 401 Authorization Required，并且带有首部字段 [WWW-Authenticate](#WWW-Authenticate)，字段内包含认证的方式，即 BASIC，以及 Request-URI 安全与字符串。
+2.   客户端将用户 ID 与密码发送给服务器（写入首部 [Authorization](#Authorization) 中），中间通过冒号（:）连接，再经过 Base64 编码处理。
+3.   服务器在进行验证并通过之后，会返回一条包含 Request-URI 资源的响应。
+
+注意：BASIC 采用的 Base64 编码不是加密处理，因此密码容易被窃听（HTTPS 通信时不会）。
+
 ### DIGEST 认证
+
+![DIGEST](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/DIGEST.jpg)
+
+该方法避免了信息泄露的风险。
+
+1.   服务器在需要客户端进行认证时，返回 401 Authorization Required 以及首部字段 [WWW-Authenticate](#WWW-Authenticate)，首部字段内包含 realm 和 nonce 两个字段，其中，nonce 表示一个随机字符串，一般为 Base64 编码。
+2.   客户端返回的 [Authorization](#Authorization) 中包含 username、realm、nonce、uri 和 response 的字段信息。realm 和 nonce 是之前服务器响应的内容，而 username 是 realm 限定范围内可以进行认证的用户名，uri 即 Request-URI 的值，response 即为经过 MD5 运算后的密码字符，也就是 Request-Digest。
+3.   服务端接收到认证信息后，进行确认，确认后返回包含 Request-URI 资源的响应，并在 Authentication-Info 首部字段中加入一些认证成功的信息。
+
+>   DIGEST 认证提供防止密码被窃听的保护机制，但并不存在防止用户伪装的保护机制。
 
 ### SSL 客户端认证
 
+以上提到的两种认证都在使用上不那么便捷灵活，也达不到多数 Web 网站对高度安全等级的追求标准，因此适用范围有所受限。
+
+SSL 认证可以避免用户密码被盗的情况，因此该认证方式使用客户端证书，服务器收到客户端证书之后，验证通过即可领取客户端内的公开密钥，之后就可以开始 HTTPS 加密通信了。
+
 ### 基于表单的认证
+
+但是一般情况下，SSL 客户端认证不会仅依靠证书，一般会使用和基于表单认证相结合的双因素认证方式。再认证过程中，不仅仅需要密码，还需要申请认证者提供其他持有信息。也就是说，SSL 客户端证书用来认证**客户端计算机**，另一个认证因素密码用来确认这是用户本人。
+
+HTTP 协议中并没有定义基于表单的认证方法，而是通过服务器上的 Web 应用程序发送登录信息，通过应用程序来进行认证。
+
+BASIC 认证和 DIGEST 认证由于安全性问题，使用受限，而 SSL 客户端证书认证需要面对繁琐的导入以及维护费用等问题，因此这种基于表单的认证方式也是最为常见的方式。
+
+### Session 及 Cookie 管理
+
+由于 HTTP 无状态协议的特点，如果认证成功，之后的操作不应该再次进行认证，因此必须有一个机制来保存用户的状态。否则用户下一次操作，服务器会认为他和其他用户一样没有通过认证。
+
+状态管理可以用 Session 和 Cookie 机制，如图：
+
+![](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/session.jpg)
+
+简而言之，客户端进行认证，成功之后，服务器会使用 Session 机制来记录用户状态。服务器给客户端发放识别用户的 SessionID，这个 ID 会和用户状态进行绑定。之后服务器的响应里会包含 [Set-Cookie](#Set-Cookie（响应首部字段）) 首部，写入 SessionID，例如（JSESSIONID = XXXX），客户端会将这个 SessionID 作为 Cookie 保存。
+
+对于 SessionID 来说，需要防止其被盗用，因此 SessionID 需要使用加密后的字符串，同时，客户端应该对 SessionID 有**过期时间**的限制。
+
+为了防止跨站脚本攻击，还需要指定 Cookie 首部字段属性 HttpOnly。
 
 ## 基于 HTTP 的功能追加协议
 
+### SPDY 协议——解决性能瓶颈
+
+#### HTTP 的瓶颈
+
+大量内容同时发生频繁改变，如何更新？
+
+*   一条连接只可以发送一个请求
+*   请求只可以从**客户端**发，客户端只能接收响应
+*   首部信息多，冗余，造成资源浪费
+*   首部未压缩
+
+#### Ajax 解决方法
+
+Ajax（Asynchronous JavaScript and XML，异步 JavaScript 与 XML 技术），可以利用 JavaScript 和 DOM（Document Object Model，文档对象模型）的操作，达到**局部**Web页面**替换加载**的**异步**通信手段。（只更新一部分页面，因此数据量减小）
+
+![ajax](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/ajax.jpg)
+
+#### Comet 解决方法
+
+该方法即为长连接，模拟服务端进行推送。即：服务端接收到请求之后，会挂起响应，之后当需要有内容更新时，再返回响应。这种方法可以做到实时更新，但是为了保持连接，会消耗很多资源。
+
+![comet](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/comet.jpg)
+
+#### SPDY
+
+SPDY 在 TCP/IP 的应用层与传输层之间加入了会话层，主要负责控制对**数据的流动**，并且不影响处于应用层的 HTTP 协议。
+
+这样一来，HTTP 协议获得以下功能：
+
+1.   多路复用：一个 TCP 连接可以处理多个 HTTP 请求。
+2.   请求被赋予优先级：可以解决因为多个请求，低带宽导致的响应变慢的问题。
+3.   压缩 HTTP 首部
+4.   推送功能
+5.   服务器提示客户端请求所需的资源
+
+### WebSocket 协议——全双工通信
+
+当双方建立起 WebSocket 协议的通信之后，客户端与服务器都可以互相发送数据，即为**全双工**。该通信协议是长连接的。
+
+该通信的建立需要 HTTP 连接已经建立，由客户端发送改变协议的请求。
+
+客户端使用 [Upgrade](#Upgrade) 首部字段发送请求：
+
+```http
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Origin: http://example.com
+Sec-WebSocket-Protocol: chat, superchat
+Sec-WebSocket-Version: 13
+```
+
+Sec-WebSocket-Key 字段内记录着握手过程中必不可少的键值。Sec-WebSocket-Protocol 字段内记录使用的子协议。
+
+服务器收到改变协议的请求之后，返回状态码 101 Switching Protocols 的响应。
+
+```http
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+Sec-WebSocket-Protocol: chat
+```
+
+Sec-WebSocket-Accept 的字段值是由握手请求中的 Sec-WebSocket-Key 的字段值生成的。
+
+成功握手确立 WebSocket 连接之后，通信时不再使用 HTTP 的数据帧，而采用 WebSocket 独立的数据帧。如图：
+
+![ws](https://raw.githubusercontent.com/IssacStudent/MarkdownImg/master/img/ws.jpg)
+
+### HTTP/2.0
+
+HTTP/2的通过支持请求与响应的多路复用来减少延迟，通过压缩HTTP首部字段将协议开销降至最低，同时增加对请求优先级和服务器端推送的支持。HTTP/2.0 具体的变化有[^10]：
+
+#### 二进制分帧
+
+>   **帧：**HTTP/2 数据通信的最小单位消息：指 HTTP/2 中逻辑上的 HTTP 消息。例如请求和响应等，消息由一个或多个帧组成。
+>
+>   **流：**存在于连接中的一个虚拟通道。流可以承载双向消息，每个流都有一个唯一的整数ID。
+>
+>   HTTP/2 采用二进制格式传输数据，而非 HTTP 1.x 的文本格式，二进制协议解析起来更高效。 HTTP/1 的请求和响应报文，都是由起始行，首部和实体正文（可选）组成，各部分之间以文本换行符分隔。HTTP/2 将请求和响应数据分割为更小的帧，并且它们采用二进制编码。
+>
+>   **HTTP/2 中，同域名下所有通信都在单个连接上完成，该连接可以承载任意数量的双向数据流。**每个数据流都以消息的形式发送，而消息又由一个或多个帧组成。多个帧之间可以乱序发送，根据帧首部的流标识可以重新组装。
+
+#### 多路复用
+
+>   多路复用，代替原来的序列和阻塞机制。所有就是请求的都是通过一个 TCP 连接并发完成。 HTTP 1.x 中，如果想并发多个请求，必须使用多个 TCP 链接，且浏览器为了控制资源，还会对单个域名有 6-8个的TCP链接请求限制。
+>
+>   在 HTTP/2 中，有了二进制分帧之后，HTTP/2 不再依赖 TCP 链接去实现多流并行了，在 HTTP/2中：
+>
+>   +   同域名下所有通信都在单个连接上完成。
+>   +   单个连接可以承载任意数量的双向数据流。
+>   +   数据流以消息的形式发送，而消息又由一个或多个帧组成，多个帧之间可以**乱序**发送，因为根据帧首部的**流标识**可以**重新组装**。
+>
+>   这一特性，使性能有了极大提升：
+>
+>   +   **同个域名只需要占用一个 TCP 连接**，消除了因多个 TCP 连接而带来的延时和内存消耗。
+>   +   单个连接上可以并行交错的请求和响应，之间互不干扰。
+>   +   在 HTTP/2 中，每个请求都可以带一个 31bit 的优先值，0 表示最高优先级， 数值越大优先级越低。有了这个优先值，客户端和服务器就可以在处理不同的流时采取不同的策略，以最优的方式发送流、消息和帧。
+
+#### 服务器推送
+
+>   服务端可以在发送页面 HTML 时主动推送其它资源，而不用等到浏览器解析到相应位置，发起请求再响应。例如服务端可以主动把 JS 和 CSS 文件推送给客户端，而不需要客户端解析 HTML 时再发送这些请求。
+>
+>   服务端可以主动推送，客户端也有权利选择是否接收。如果服务端推送的资源已经被浏览器缓存过，浏览器可以通过发送 RST_STREAM 帧来拒收。主动推送也遵守同源策略，服务器不会随便推送第三方资源给客户端。
+
+#### 头部压缩
+
+>   +   HTTP/2 在客户端和服务器端使用“首部表”来跟踪和存储之前发送的键－值对，对于相同的数据，不再通过每次请求和响应发送；
+>   +   首部表在 HTTP/2 的连接存续期内始终存在，由客户端和服务器共同渐进地更新;
+>   +   每个新的首部键－值对要么被追加到当前表的末尾，要么替换表中之前的值。
+
+### WebDAV 协议——管理服务器文件
+
+WebDAV（Web-based Distributed Authoring and Versioning，基于万维网的分布式创作和版本控制）协议可以对 Web 服务器上的内容资源（一般是文件）进行创建、复制、编辑、删除、对文件加锁等操作的分布式文件系统。
+
+WebDAV定义的属性：
+
+*   集合（Collection）：是一种统一管理多个资源的概念。以集合为单位可进行各种操作。也可实现类似集合的集合这样的叠加。
+*   资源（Resource）：把文件或集合称为资源。
+*   属性（Property）：定义资源的属性。定义以“名称 = 值”的格式执行。
+*   锁（Lock）：把文件设置成无法编辑状态。多人同时编辑时，可防止在同一时间进行内容写入。
+
+该协议也对 HTTP/1.1 中追加了一些方法与状态码：
+
+*   PROPFIND ：获取属性
+
+*   PROPPATCH ：修改属性
+
+*   MKCOL ：创建集合
+
+*   COPY ：复制资源及属性
+
+*   MOVE ：移动资源
+
+*   LOCK ：资源加锁
+
+*   UNLOCK ：资源解锁
+
+    状态码扩展：
+
+*   102 Processing ：可正常处理请求，但目前是处理中状态
+*   207 Multi-Status ：存在多种状态
+*   422 Unprocessible Entity ：格式正确，内容有误
+*   423 Locked ：资源已被加锁
+*   424 Failed Dependency ：处理与某请求关联的请求失败，因此不再维持依赖关系
+*   507 Insufficient Storage ：保存空间不足
+
 ## 构建 Web 内容的技术
+
+### HTML
+
+>   HTML（HyperText Markup Language，超文本标记语言）。超文本是一种文档系统，可将文档中任意位置的信息与其他信息（文本或图片等）建立关联，即超链接文本。标记语言是指通过在文档的某部分穿插特别的字符串标签，用来修饰文档的语言。我们把出现在 HTML 文档内的这种特殊字符串叫做 HTML 标签（Tag）。
+
+```html
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>hackr.jp</title>
+<style type="text/css">
+.logo {
+padding: 20px;
+text-align: center;
+}<
+/style>
+</head>
+<body>
+<div class="logo">
+	<p><img src="photo.jpg" alt="photo" width="240" height="127" /></p>
+	<p><img src="hackr.gif" alt="hackr.jp" width="240" height="84" /></p>
+	<p><a href="http://hackr.jp/">hackr.jp</a> </p>
+</div>
+</body>
+</html>
+```
+
+### CSS
+
+>   CSS（Cascading Style Sheets，层叠样式表）可以指定如何展现 HTML内的各种元素，属于样式表标准之一。即使是相同的 HTML 文档，通过改变应用的 CSS，用浏览器看到的页面外观也会随之改变。CSS的理念就是让文档的**结构**和**设计**分离，达到**解耦**的目的。
+
+```css
+.logo {
+	padding: 20px;
+	text-align: center;
+}
+```
+
+### 动态 HTML
+
+>   动态 HTML 可以使用客户端脚本语言 JavaScript，实现对 HTML 的 Web 页面的动态改造。DOM 是用以操作 HTML 文档和 XML 文档的 API（Application Programming Interface，应用编程接口）。使用 DOM 可以将 HTML 内的**元素当作对象操作**，如**取出**元素内的**字符串**、**改变**那个 CSS 的**属性**等，使页面的设计发生**改变**。
+
+例如，对如下 HTML 文档（\<p\> 标签表示段落）：
+
+```html
+<body>
+	<h1>繁琐的Web安全</h1>
+	<p>第Ⅰ部分 Web的构成元素</p>
+	<p>第Ⅱ部分 浏览器的安全功能</p>
+	<p>第Ⅲ部分 接下来发生的事</p>
+</body>
+```
+
+如果想对其第三个段落（索引为 2）改变文字颜色，则可以嵌入如下代码：
+
+```javascript
+<script type="text/javascript">
+	var content = document.getElementsByTagName('P');
+	content[2].style.color = '#FF0000';
+</script>
+```
+
+### Web 应用
+
+Web 服务器不仅仅可以返回实现已经写好的静态内容（网页等资源），也可以通过**运行**服务器上的**程序**，返回动态内容，该内容是可变的。
+
+#### CGI
+
+>   CGI（Common Gateway Interface，通用网关接口）是指 Web 服务器在接收到客户端发送过来的请求后转发给程序的一组机制。在 CGI 的作用下，程序会对请求内容做出相应的动作，比如创建 HTML 等动态内容。CGI 程序通常是用 Perl、PHP、Ruby 和 C 等编程语言编写而成。
+
+即：客户端发送请求至服务器，服务器通过运行 CGI 程序，获得所需要的响应。
+
+#### Servlet
+
+Servlet（Servlet = Server + Applet）是用 Java 语言实现的程序。[CGI](#CGI) 每次接到请求，程序都要重新启动，执行一次，因此需要考虑负载问题。而 Servlet 运行在一个进程中，运行环境成为 Web 容器或者 Servlet 容器。
+
+### 数据格式以及语言
+
+#### 可扩展标记语言 XML
+
+>   XML（eXtensible Markup Language，可扩展标记语言）是一种可按应用目标进行扩展的通用标记语言。旨在通过使用 XML，使互联网数据共享变得更容易。
+
+>   XML 和 HTML 都是从标准通用标记语言 SGML（Standard Generalized Markup Language）简化而成。与 HTML 相比，它对数据的记录方式做了特殊处理。和 HTML 一样，使用标签构成**树形结构**，并且可**自定义扩展标签**。从 XML 文档中读取数据比起 HTML **更为简单**。由于 XML 的结构基本上都是用**标签分割而成的树形结构**，因此通过语法分析器（Parser）的解析功能解析 XML 结构并取出数据元素，可更容易地对数据进行读取。
+
+由于 XML 更容易读取的特点，使得 XML 可以用在 2 个不同应用之间的**数据交换格式化**[^11]。
+
+#### RSS/Atom
+
+>   RSS（简易信息聚合，也叫聚合内容）和 Atom 都是发布新闻或博客日志等更新信息文档的格式的总称。两者都用到了 XML。
+
+#### JSON
+
+>   JSON（JavaScript Object Notation）是一种以 JavaScript（ECMAScript）的对象表示法为基础的轻量级数据标记语言。能够处理的数据类型有 false/null/true/ 对象 / 数组 / 数字 / 字符串，这 7 种类型。
+
+```json
+{"name": "Web Application Security", "num": "TR001"}
+```
+
+JSON 让数据更轻更纯粹，并且 JSON 的字符串形式可被 JavaScript 轻易地读入[^11]。
 
 ## Web 的攻击技术
 
-[^1]:对无状态的说明：HTTP 协议自身不会对请求与响应做持久化处理，主要是为了更快处理**大量事务**
-[^2]:在 REST 架构的网站中，PUT 和 POST 都可以向 HTTP 服务器提交数据，但 PUT 一般是幂等的。若不存在则新建内容，若存在则修改内容，具体见 [RFC文档](https://www.rfc-editor.org/rfc/rfc7231)。
-[^3]:对于多重范围的请求，响应的首部字段会设置 `Content-Type: multipart/byteranges` 后返回响应报文。
-[^4]:303 与 302 类似，但是 303 状态码明确表示客户端应当用 **GET方法** 获取资源。
-[^5]:301、302、303 响应状态码返回时，几乎所有浏览器都会把 POST 改成 GET，之后再次发送请求，但实际上，301 和 302 是禁止这么做的。
-[^6]:比如首部信息包含：`If-Match`、`If-Modified-Since`、`If-None-Match`、`If-Range`、`If-Unmodified-Since`
-[^7]:注意区别：no-cache 必须做强制性的有效性校验，而 no-store 侧重于真正的不存储任何资源。
+### 针对 Web 的攻击技术
 
-[^8]:当对实体的主体使用了内容编码时，不能再使用该字段。
+### 因输出值转义不完全引发的安全漏洞
 
-[^9]:认证机构的公开密钥一般是在浏览器内部植入的。
+### 因设置或设计上的缺陷引发的安全漏洞
+
+### 因回话管理疏忽引发的安全漏洞
+
+#### 其他安全漏洞
+
+[^1]: 对无状态的说明：HTTP 协议自身不会对请求与响应做持久化处理，主要是为了更快处理**大量事务**
+[^2]: 在 REST 架构的网站中，PUT 和 POST 都可以向 HTTP 服务器提交数据，但 PUT 一般是幂等的。若不存在则新建内容，若存在则修改内容，具体见 [RFC文档](https://www.rfc-editor.org/rfc/rfc7231)。
+[^3]: 对于多重范围的请求，响应的首部字段会设置 `Content-Type: multipart/byteranges` 后返回响应报文。
+[^4]: 303 与 302 类似，但是 303 状态码明确表示客户端应当用 **GET方法** 获取资源。
+[^5]: 301、302、303 响应状态码返回时，几乎所有浏览器都会把 POST 改成 GET，之后再次发送请求，但实际上，301 和 302 是禁止这么做的。
+[^6]: 比如首部信息包含：`If-Match`、`If-Modified-Since`、`If-None-Match`、`If-Range`、`If-Unmodified-Since`
+[^7]: 注意区别：no-cache 必须做强制性的有效性校验，而 no-store 侧重于真正的不存储任何资源。
+
+[^8]: 当对实体的主体使用了内容编码时，不能再使用该字段。
+
+[^9]: 认证机构的公开密钥一般是在浏览器内部植入的。
+[^10]: https://zhuanlan.zhihu.com/p/26559480
+[^11]:XML 格式的文件常见与 SOAP 架构的软件，而 JSON 多用于 RESTful 架构的软件。具体可参考https://www.redhat.com/zh/topics/integration/whats-the-difference-between-soap-rest
